@@ -18,7 +18,7 @@ driver = webdriver.Chrome(PATH)
 driver.get('https://postmates.com/feed')
 
 search = driver.find_element_by_xpath('//input[@class="geosuggest__input css-ukyjo8"]')
-search.send_keys("New York, NY")
+search.send_keys("75 9th Ave, New York, NY")
 search.send_keys(Keys.RETURN)
 
 restInfo = []
@@ -53,12 +53,12 @@ for card in cards:
     restLink = element.get_attribute("href")
     links.append(restLink)
 
-menuItems = []
-menuItemDesc = []
-menuItemPrices = []
-popularItems = []
-popularItemsDesc = []
-popularItemPrices = []
+#menuItem = ""
+#menuItemDesc = ""
+#menuItemPrice = ""
+#popularItems = []
+#popularItemsDesc = []
+#popularItemPrices = []
 name = ""
 category = ""
 favorites = ""
@@ -70,7 +70,10 @@ popItemName = ""
 popItemDescription = ""
 popItemPrice = ""
 
+i = 0
 for link in links:
+    i = i + 1
+    print(i)
 
     restDict = {}
     try:
@@ -79,8 +82,7 @@ for link in links:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-
-
+        continue
 
     try:
         mainContainer = WebDriverWait(driver, 60).until(
@@ -91,8 +93,10 @@ for link in links:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
-        driver.close()
-        driver.quit()
+        #driver.close()
+        #driver.quit()
+        continue
+
 
     try:
         name = mainContainer.find_element_by_xpath('.//h1[@class="css-czd68n eifi54g1"]').text
@@ -122,16 +126,17 @@ for link in links:
     print('Address: ', address)
 
     try:
-        menuItem = mainContainer.find_elements_by_xpath('.//div[@class="css-14tel0n e1tw3vxs1"]')
+        menuItems = mainContainer.find_elements_by_xpath('.//div[@class="css-14tel0n e1tw3vxs1"]')
     except:
-        menuItem = []
+        menuItems = []
+    '''
+        try:
+            popularItem = mainContainer.find_elements_by_xpath('.//div[@class="css-27o8c0 e1u06svg3"]')
+        except:
+            popularItem = []
+    '''
 
-    try:
-        popularItem = mainContainer.find_elements_by_xpath('.//div[@class="css-27o8c0 e1u06svg3"]')
-    except:
-        popularItem = []
-
-    for item in menuItem:
+    for item in menuItems:
 
         try:
             itemName = item.find_element_by_xpath('.//h3[@class="product-name css-1yjxguc e1tw3vxs4"]').text
@@ -148,66 +153,84 @@ for link in links:
         except:
             itemPrice = ""
 
+        print(name.encode('utf-8'), ' - ', category, ' - ',favorites, ' - ', address, ' - ', itemName, ' - ', itemDescription, ' - ', itemPrice)
 
-        print(itemName, ' - ', itemDescription, ' - ', itemPrice)
+        restDict['Name'] = name.encode('utf-8')
+        restDict['Category'] = category.encode('utf-8')
+        restDict['Favorites'] = favorites.encode('utf-8')
+        restDict['Address'] = address.encode('utf-8')
+        restDict['MenuItem'] = itemName.encode('utf-8')
+        restDict['MenuItemDesc'] = itemDescription.encode('utf-8')
+        restDict['MenuItemPrice'] = itemPrice.encode('utf-8')
+
+        field_names = ['Name', 'Category', 'Favorites', 'Address', 'MenuItem', 'MenuItemDesc', 'MenuItemPrice']
+
+        with open('test10.csv', 'a') as f_object:
+            dictwriter_object = DictWriter(f_object, fieldnames=field_names)
+            dictwriter_object.writerow(restDict)
+            f_object.close()
 
 
-        menuItems.append((itemName, itemDescription, itemPrice))
+
+
+        #menuItems.append((itemName, itemDescription, itemPrice))
         #menuItemDesc.append(itemDescription)
         #menuItemPrices.append(itemPrice)
 
-    for item in popularItem:
 
-        try:
-            popItemName = item.find_element_by_xpath('.//h3[@class="product-name css-1yjxguc e1tw3vxs4"]').text
-        except:
-            popItemName = ""
+    '''
+        for item in popularItem:
+    
+            try:
+                popItemName = item.find_element_by_xpath('.//h3[@class="product-name css-1yjxguc e1tw3vxs4"]').text
+            except:
+                popItemName = ""
+    
+            try:
+                popItemDescription = item.find_element_by_xpath('.//div[@class="product-description css-1cwo7kl e1tw3vxs8"]').text
+            except:
+                popItemDescription = ""
+    
+            try:
+                popItemPrice = item.find_element_by_xpath('.//span[@class="css-yzlrwy e1tw3vxs6"]/span').text
+            except:
+                popItemPrice = ""
+    
+            print(popItemName, ' - ', popItemDescription, ' - ', popItemPrice)
+            popularItems.append((popItemName, popItemDescription, popItemPrice))
+            #popularItemsDesc.append(popItemDescription)
+            #popularItemPrices.append(popItemPrice)
+    '''
 
-        try:
-            popItemDescription = item.find_element_by_xpath('.//div[@class="product-description css-1cwo7kl e1tw3vxs8"]').text
-        except:
-            popItemDescription = ""
-
-        try:
-            popItemPrice = item.find_element_by_xpath('.//span[@class="css-yzlrwy e1tw3vxs6"]/span').text
-        except:
-            popItemPrice = ""
-
-        print(popItemName, ' - ', popItemDescription, ' - ', popItemPrice)
-        popularItems.append((popItemName, popItemDescription, popItemPrice))
-        #popularItemsDesc.append(popItemDescription)
-        #popularItemPrices.append(popItemPrice)
-
-    sleeptime = random.randint(20,25)
+    sleeptime = random.randint(28,32)
     time.sleep(sleeptime)
 
-
-    restDict['Name'] = name.encode('utf-8')
-    restDict['Category'] = category
-    restDict['Favorites'] = favorites
-    restDict['Address'] = address
-    restDict['MenuItems'] = menuItems
+    #restDict['Name'] = name.encode('utf-8')
+    #restDict['Category'] = category
+    #restDict['Favorites'] = favorites
+    #restDict['Address'] = address
+    #restDict['MenuItems'] = menuItems
     #restDict['MenuItemDesc'] = menuItemDesc
     #restDict['MenuItemPrices'] = menuItemPrices
-    restDict['PopularItems'] = popularItems
+    #restDict['PopularItems'] = popularItems
     #restDict['PopularItemsDesc'] = popularItemsDesc
     #restDict['PopularItemPrices'] = popularItemPrices
 
     menuItems = []
     #menuItemDesc = []
     #menuItemPrices = []
-    popularItems = []
+    #popularItems = []
     #popularItemsDesc = []
     #popularItemPrices = []
 
-    restInfo.append(restDict)
+    #restInfo.append(restDict)
 
-    field_names = ['Name', 'Category', 'Favorites', 'Address', 'MenuItems', 'PopularItems']
+    #field_names = ['Name', 'Category', 'Favorites', 'Address', 'MenuItems', 'PopularItems']
 
-    with open('test4.csv', 'a') as f_object:
-        dictwriter_object = DictWriter(f_object, fieldnames=field_names)
-        dictwriter_object.writerow(restDict)
-        f_object.close()
+    #with open('test4.csv', 'a') as f_object:
+    #    dictwriter_object = DictWriter(f_object, fieldnames=field_names)
+    #    dictwriter_object.writerow(restDict)
+    #    f_object.close()
 
 
 #pd.DataFrame(restInfo).to_csv('postmates.csv', index=False)

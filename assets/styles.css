@@ -1,0 +1,9 @@
+#slct_category .VirtualizedSelectOption {
+  background-color: black;
+  color: white
+}
+
+#slct_category .VirtualizedSelectFocusedOption {
+  background-color: rgb(51,52,50);
+  color: white
+}
