@@ -6,7 +6,10 @@ import plotly.graph_objects as go
 import dash  # (version 1.12.0) pip install dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer
 import plotly.io as plt_io
 from matplotlib.pyplot import cm
 
@@ -18,12 +21,21 @@ token = 'pk.eyJ1IjoiYmJydXNzbzExNSIsImEiOiJja29qY2x4Z2wwMnk3MnBvNzRldXo2a2J2In0.
 postmates = pd.read_csv("postmates_all2.csv")
 postmates = postmates.loc[:, ~postmates.columns.str.contains('^Unnamed')]
 
+postmatesBOW = pd.read_csv("postmates_BOW.csv")
+#postmatesBOW = postmates.loc[:, ~postmatesBOW.columns.str.contains('^Unnamed')]
+print(postmatesBOW.columns)
+
+
 # Add scale column to scale favorites column
 postmates_grouped = postmates.groupby(['Name', 'Category', 'Latitude', 'Longitude']).mean().reset_index()
 fav_scaled = (postmates_grouped["Favorites"].max() - postmates_grouped["Favorites"].min()) / 16
 postmates_grouped["scale"] = (postmates_grouped["Favorites"] - postmates_grouped[
     "Favorites"].min()) / fav_scaled + 1
 
+#Train model
+count = CountVectorizer()
+countVec = count.fit(postmatesBOW['BagOfWords'])
+count_matrix = countVec.transform(postmatesBOW['BagOfWords'])
 
 # ------------------------------------------------------------------------------
 # App layout
@@ -41,7 +53,51 @@ app.layout = html.Div([
     html.Div(id='output_container', children=[]),
     html.Br(),
 
-    dcc.Graph(id='postmates_map',figure={}),
+    dcc.Graph(id='postmates_map', figure={}),
+
+    html.Br(),
+    html.Br(),
+
+    dcc.Input(
+        id='meal_description',
+        placeholder='Describe the meal you are in the mood for...',
+        type='text',
+        value='',
+        style={'height': '40px','backgroundColor':'rgb(51, 52, 50)','border': 'rgb(17,17,17)',
+               'border-radius': '5px', 'width':'100%','color':'white','padding-left':'10px'}
+    ),
+
+    html.Br(),
+    html.Br(),
+
+    dash_table.DataTable(
+        id='table',
+        columns=[{"name": i, "id": i} for i in postmates.columns[[0, 4, 5]]],
+        #data=postmates.to_dict('records'),
+        style_cell={
+            'whiteSpace': 'normal',
+            'height': 'auto',
+            'backgroundColor': 'rgb(25, 26, 26)',
+            'color': 'white'
+        },
+        style_header={
+            'backgroundColor': 'rgb(30, 30, 30)',
+            'fontWeight': 'bold'
+        },
+        style_cell_conditional=[
+
+            {'if': {'column_id': 'Name'},
+                'textAlign': 'left'},
+
+            {'if': {'column_id': 'MenuItem'},
+             'textAlign': 'left'},
+
+            {'if': {'column_id': 'Name'},
+                  'width': '15%'},
+        ],
+
+        style_as_list_view=True
+    )
 
 ])
 
@@ -68,6 +124,24 @@ def update_graph(option_slctd):
     fig.update_layout(uirevision=True)
 
     return fig
+
+@app.callback(
+    Output(component_id='table', component_property='data'),
+    [Input(component_id='meal_description', component_property='value')]
+)
+def update_table(meal_description):
+
+    postmatesBOWCopy = postmatesBOW.copy()
+
+    user_input = [meal_description]
+    count_matrix_inp = countVec.transform(user_input)
+
+    cosine_sim = cosine_similarity(count_matrix, count_matrix_inp)
+    most_similar = cosine_sim[:, 0].argsort(axis=0)[::-1]
+
+    postmatesBOWCopy = postmatesBOWCopy.iloc[most_similar].head(50)
+
+    return postmatesBOWCopy.to_dict('records')
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
