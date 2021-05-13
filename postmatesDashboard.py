@@ -15,11 +15,11 @@ app = dash.Dash(__name__)
 # ---------- Import and clean data, set token (importing csv into pandas)
 # Plotly Express
 token = 'pk.eyJ1IjoiYmJydXNzbzExNSIsImEiOiJja29qY2x4Z2wwMnk3MnBvNzRldXo2a2J2In0.6zgZNfkLxe6DylEBbMglZA'
-postmates = pd.read_csv("postmates_all.csv")
+postmates = pd.read_csv("postmates_all2.csv")
 postmates = postmates.loc[:, ~postmates.columns.str.contains('^Unnamed')]
 
 # Add scale column to scale favorites column
-postmates_grouped = postmates.groupby(['Name', 'Category']).mean().reset_index()
+postmates_grouped = postmates.groupby(['Name', 'Category', 'Latitude', 'Longitude']).mean().reset_index()
 fav_scaled = (postmates_grouped["Favorites"].max() - postmates_grouped["Favorites"].min()) / 16
 postmates_grouped["scale"] = (postmates_grouped["Favorites"] - postmates_grouped[
     "Favorites"].min()) / fav_scaled + 1
@@ -42,8 +42,6 @@ app.layout = html.Div([
     html.Br(),
 
     dcc.Graph(id='postmates_map',figure={}),
-
-
 
 ])
 
