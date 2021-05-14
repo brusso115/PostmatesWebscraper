@@ -18,7 +18,7 @@ app = dash.Dash(__name__)
 # ---------- Import and clean data, set token (importing csv into pandas)
 # Plotly Express
 token = 'pk.eyJ1IjoiYmJydXNzbzExNSIsImEiOiJja29qY2x4Z2wwMnk3MnBvNzRldXo2a2J2In0.6zgZNfkLxe6DylEBbMglZA'
-postmates = pd.read_csv("postmates_all2.csv")
+postmates = pd.read_csv("postmates_all6.csv")
 postmates = postmates.loc[:, ~postmates.columns.str.contains('^Unnamed')]
 
 postmatesBOW = pd.read_csv("postmates_BOW.csv")
@@ -37,26 +37,30 @@ count = CountVectorizer()
 countVec = count.fit(postmatesBOW['BagOfWords'])
 count_matrix = countVec.transform(postmatesBOW['BagOfWords'])
 
+#Plot map figure
+fig = px.scatter_mapbox(postmates_grouped, lat="Latitude", lon="Longitude",
+                        size="scale", hover_name="Name", hover_data=["Favorites"], color="Category", zoom=10,
+                        height=800, template="plotly_dark",
+                        )
+fig.update_layout(mapbox_style="dark", mapbox_accesstoken=token)
+fig.update_traces(marker={'sizemin': 4})
+fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+fig.update_layout(uirevision=True)
+
 # ------------------------------------------------------------------------------
 # App layout
 app.layout = html.Div([
 
     html.H1("Postmates Restaurant Data", style={'text-align': 'center', 'backgroundColor':'rgb(17,17,17)', 'color': 'white'}),
 
-    dcc.Dropdown(id="slct_category",
-                 options=[{'label': i, 'value': i} for i in np.unique(np.array(postmates['Category'].values))],
-                 multi=True,
-                 value=[],
-                 style={'backgroundColor': 'rgb(51,52,50)', 'color': 'rgb(51,52,50)', 'border': 'rgb(17,17,17)'}
-    ),
-
     html.Div(id='output_container', children=[]),
-    html.Br(),
+    #html.Br(),
 
-    dcc.Graph(id='postmates_map', figure={}),
+    dcc.Graph(id='postmates_map', figure=fig),
 
-    html.Br(),
-    html.Br(),
+    #html.Br(),
+
+    html.H1("Find Food Your In The Mood For", style={'text-align': 'center', 'backgroundColor':'rgb(17,17,17)', 'color': 'white'}),
 
     dcc.Input(
         id='meal_description',
@@ -64,7 +68,8 @@ app.layout = html.Div([
         type='text',
         value='',
         style={'height': '40px','backgroundColor':'rgb(51, 52, 50)','border': 'rgb(17,17,17)',
-               'border-radius': '5px', 'width':'100%','color':'white','padding-left':'10px'}
+               'border-radius': '5px', 'width':'99%','color':'white','padding-left':'10px'},
+        #return fig
     ),
 
     html.Br(),
@@ -72,12 +77,12 @@ app.layout = html.Div([
 
     dash_table.DataTable(
         id='table',
-        columns=[{"name": i, "id": i} for i in postmates.columns[[0, 4, 5]]],
+        columns=[{"name": i, "id": i} for i in postmates.columns[[0, 4, 5, 6]]],
         #data=postmates.to_dict('records'),
         style_cell={
             'whiteSpace': 'normal',
             'height': 'auto',
-            'backgroundColor': 'rgb(25, 26, 26)',
+            'backgroundColor': 'rgb(17, 17, 17)',
             'color': 'white'
         },
         style_header={
@@ -92,6 +97,9 @@ app.layout = html.Div([
             {'if': {'column_id': 'MenuItem'},
              'textAlign': 'left'},
 
+            {'if': {'column_id': 'MenuItemDescription'},
+             'textAlign': 'left'},
+
             {'if': {'column_id': 'Name'},
                   'width': '15%'},
         ],
@@ -103,16 +111,20 @@ app.layout = html.Div([
 
 # ------------------------------------------------------------------------------
 # Connect the Plotly graphs with Dash Components
+'''
 @app.callback(
-    Output(component_id='postmates_map', component_property='figure'),
-    [Input(component_id='slct_category', component_property='value')]
+    Output(component_id='postmates_map', component_property='figure')
+    #[Input(component_id='slct_category', component_property='value')]
 )
-def update_graph(option_slctd):
-
+def update_graph():
+    
     if option_slctd == []:
         postmatesGrouped = postmates_grouped[postmates_grouped['Category'].isin(list(postmates_grouped['Category']))]
     else:
         postmatesGrouped = postmates_grouped[postmates_grouped['Category'].isin(option_slctd)]
+    
+
+    postmatesGrouped = postmates_grouped.copy()
 
     fig = px.scatter_mapbox(postmatesGrouped, lat="Latitude", lon="Longitude",
                             size="scale", hover_name="Name", hover_data=["Favorites"], color="Category", zoom=10,
@@ -124,6 +136,7 @@ def update_graph(option_slctd):
     fig.update_layout(uirevision=True)
 
     return fig
+'''
 
 @app.callback(
     Output(component_id='table', component_property='data'),

@@ -18,7 +18,7 @@ driver = webdriver.Chrome(PATH)
 driver.get('https://postmates.com/feed')
 
 search = driver.find_element_by_xpath('//input[@class="geosuggest__input css-ukyjo8"]')
-search.send_keys("Upper West Side, New York, NY")
+search.send_keys("Lincoln Square, Manhattan, New York City, New York ")
 search.send_keys(Keys.RETURN)
 
 restInfo = []
@@ -165,7 +165,7 @@ for link in links:
 
         field_names = ['Name', 'Category', 'Favorites', 'Address', 'MenuItem', 'MenuItemDesc', 'MenuItemPrice']
 
-        with open('test11.csv', 'a') as f_object:
+        with open('test13.csv', 'a') as f_object:
             dictwriter_object = DictWriter(f_object, fieldnames=field_names)
             dictwriter_object.writerow(restDict)
             f_object.close()
