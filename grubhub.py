@@ -165,7 +165,7 @@ for link in links:
 
         field_names = ['Name', 'Category', 'Favorites', 'Address', 'MenuItem', 'MenuItemDesc', 'MenuItemPrice']
 
-        with open('test13.csv', 'a') as f_object:
+        with open('lincolnsqday.csv', 'a') as f_object:
             dictwriter_object = DictWriter(f_object, fieldnames=field_names)
             dictwriter_object.writerow(restDict)
             f_object.close()

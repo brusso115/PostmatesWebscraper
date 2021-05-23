@@ -18,7 +18,7 @@ app = dash.Dash(__name__)
 # ---------- Import and clean data, set token (importing csv into pandas)
 # Plotly Express
 token = 'pk.eyJ1IjoiYmJydXNzbzExNSIsImEiOiJja29qY2x4Z2wwMnk3MnBvNzRldXo2a2J2In0.6zgZNfkLxe6DylEBbMglZA'
-postmates = pd.read_csv("postmates_all6.csv")
+postmates = pd.read_csv("postmates_all7.csv")
 postmates = postmates.loc[:, ~postmates.columns.str.contains('^Unnamed')]
 
 postmatesBOW = pd.read_csv("postmates_BOW.csv")
