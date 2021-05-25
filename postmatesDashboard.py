@@ -40,6 +40,7 @@ postmates_grouped = postmates.groupby(['Name', 'Category', 'Latitude', 'Longitud
 fav_scaled = (postmates_grouped["Favorites"].max() - postmates_grouped["Favorites"].min()) / 16
 postmates_grouped["scale"] = (postmates_grouped["Favorites"] - postmates_grouped[
     "Favorites"].min()) / fav_scaled + 1
+postmates_grouped['Favorites'] = postmates_grouped['Favorites'].round()
 
 #Train model
 count = CountVectorizer()
@@ -48,7 +49,9 @@ count_matrix = countVec.transform(postmatesBOW['BagOfWords'].values.astype('U'))
 
 #Plot map figure
 fig = px.scatter_mapbox(postmates_grouped, lat="Latitude", lon="Longitude",
-                        size="scale", hover_name="Name", hover_data=["Favorites"], color="Category", zoom=10,
+                        size="scale", hover_name="Name",
+                        hover_data={"scale": False, "Favorites": True, "Latitude": False, "Longitude": False},
+                        color="Category", zoom=10,
                         height=800, template="plotly_dark",
                         )
 fig.update_layout(mapbox_style="dark", mapbox_accesstoken=token)
