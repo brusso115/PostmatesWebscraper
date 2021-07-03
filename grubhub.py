@@ -1,6 +1,3 @@
-from datetime import time
-from time import sleep
-from collections import defaultdict
 import time
 import random
 from csv import DictWriter
@@ -8,10 +5,8 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.common.by import By
 import sys, os
-
 
 PATH = "/Users/baileyrusso/PycharmProjects/GrubHubScraper/chromedriver"
 driver = webdriver.Chrome(PATH)
@@ -23,6 +18,7 @@ search.send_keys(Keys.RETURN)
 
 restInfo = []
 
+#Scroll up and down on infinite scrolling page to get more restaurants
 try:
 
     for i in range(10):
@@ -53,12 +49,6 @@ for card in cards:
     restLink = element.get_attribute("href")
     links.append(restLink)
 
-#menuItem = ""
-#menuItemDesc = ""
-#menuItemPrice = ""
-#popularItems = []
-#popularItemsDesc = []
-#popularItemPrices = []
 name = ""
 category = ""
 favorites = ""
@@ -129,12 +119,6 @@ for link in links:
         menuItems = mainContainer.find_elements_by_xpath('.//div[@class="css-14tel0n e1tw3vxs1"]')
     except:
         menuItems = []
-    '''
-        try:
-            popularItem = mainContainer.find_elements_by_xpath('.//div[@class="css-27o8c0 e1u06svg3"]')
-        except:
-            popularItem = []
-    '''
 
     for item in menuItems:
 
@@ -170,108 +154,11 @@ for link in links:
             dictwriter_object.writerow(restDict)
             f_object.close()
 
-
-
-
-        #menuItems.append((itemName, itemDescription, itemPrice))
-        #menuItemDesc.append(itemDescription)
-        #menuItemPrices.append(itemPrice)
-
-
-    '''
-        for item in popularItem:
-    
-            try:
-                popItemName = item.find_element_by_xpath('.//h3[@class="product-name css-1yjxguc e1tw3vxs4"]').text
-            except:
-                popItemName = ""
-    
-            try:
-                popItemDescription = item.find_element_by_xpath('.//div[@class="product-description css-1cwo7kl e1tw3vxs8"]').text
-            except:
-                popItemDescription = ""
-    
-            try:
-                popItemPrice = item.find_element_by_xpath('.//span[@class="css-yzlrwy e1tw3vxs6"]/span').text
-            except:
-                popItemPrice = ""
-    
-            print(popItemName, ' - ', popItemDescription, ' - ', popItemPrice)
-            popularItems.append((popItemName, popItemDescription, popItemPrice))
-            #popularItemsDesc.append(popItemDescription)
-            #popularItemPrices.append(popItemPrice)
-    '''
-
     sleeptime = random.randint(28,32)
     time.sleep(sleeptime)
-
-    #restDict['Name'] = name.encode('utf-8')
-    #restDict['Category'] = category
-    #restDict['Favorites'] = favorites
-    #restDict['Address'] = address
-    #restDict['MenuItems'] = menuItems
-    #restDict['MenuItemDesc'] = menuItemDesc
-    #restDict['MenuItemPrices'] = menuItemPrices
-    #restDict['PopularItems'] = popularItems
-    #restDict['PopularItemsDesc'] = popularItemsDesc
-    #restDict['PopularItemPrices'] = popularItemPrices
-
     menuItems = []
-    #menuItemDesc = []
-    #menuItemPrices = []
-    #popularItems = []
-    #popularItemsDesc = []
-    #popularItemPrices = []
-
-    #restInfo.append(restDict)
-
-    #field_names = ['Name', 'Category', 'Favorites', 'Address', 'MenuItems', 'PopularItems']
-
-    #with open('test4.csv', 'a') as f_object:
-    #    dictwriter_object = DictWriter(f_object, fieldnames=field_names)
-    #    dictwriter_object.writerow(restDict)
-    #    f_object.close()
 
 
-#pd.DataFrame(restInfo).to_csv('postmates.csv', index=False)
-
-'''
-try:
-    search_results_url = driver.current_url
-    restInfo = defaultdict(list)
-    for card in cards:
-
-        name = card.find_element_by_xpath('.//span[@class="css-1rr4qq7 e12wrbia10"]')
-
-        category = card.find_element_by_xpath('.//span[@class="css-kwzqkl e12wrbia4"]')
-        category = category.text.encode('utf-8').split("\xb7")[-1].lstrip()
-
-        restInfo['RestaurantName'].append(name.text)
-        restInfo['Category'].append(category)
-        restaurantPageLink = card.find_element_by_xpath('./a').get_attribute("href")
-
-        driver.get(restaurantPageLink)
-
-        try:
-            numFavorites = WebDriverWait(driver,15).until(
-                EC.presence_of_element_located((By.XPATH,'//div[@class="css-namqet earl9f74"]//span[@class="css-1lzl3v6 e12xa2na1"]'))
-            )
-
-            restInfo['Favorites'].append(numFavorites.text)
-            for key, value in restInfo.items():
-                print(key, value)
-
-        finally:
-            driver.get(search_results_url)
-
-
-except Exception as ex:
-    exc_type, exc_obj, exc_tb = sys.exc_info()
-    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-    print(exc_type, fname, exc_tb.tb_lineno)
-    driver.close()
-    driver.quit()
-'''
 
 
 
