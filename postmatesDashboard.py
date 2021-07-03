@@ -22,6 +22,7 @@ from matplotlib.pyplot import cm
 wn.ensure_loaded()
 
 app = dash.Dash(__name__)
+server = app.server
 
 # ---------- Import and clean data, set token (importing csv into pandas)
 # Plotly Express
