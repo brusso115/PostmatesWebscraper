@@ -1,1 +1,1 @@
-web: gunicorn --workers 1 postmatesDashboard:server
+web: gunicorn --workers 1 postmatesDashboard:server --preload
